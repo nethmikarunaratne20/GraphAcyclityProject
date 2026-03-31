@@ -1,22 +1,48 @@
+/**
+ * Name :- Nethmi Karunaratne
+ * UOW ID :- W2119803
+ * IIT ID :- 20241218
+ */
+
 import java.util.List;
 import java.util.ArrayList;
 
 public class ListGraph extends Graph {
 
+    //creates an arrayList to create the adjacency list of the graph
     private ArrayList<ArrayList<Integer>> adjacency;
-    private boolean[] removed; // tracks removed vertices
 
+    //creates a boolean array to store vertices as removed or not
+    private boolean[] removed;
+
+    /**
+     * Constructor for ListGraph
+     * @param s is the number of vertices in the graph
+     */
     public ListGraph(int s) {
+        //calls the constructor of Graph class
         super(s);
+
+        //creates a new ArrayList named adjacency
         adjacency = new ArrayList<>(size);
+
+        //creates an instance of the above instance variable
         removed = new boolean[size];
         for (int i = 0; i < size; i++) {
+            //creates an array list for each index in the adjacency ArrayList
             adjacency.add(new ArrayList<>());
+
+            //initially sets the removed status as false
             removed[i] = false;
         }
     }
 
     @Override
+    /**
+     * The values read from the file are stored a from and to
+     * from, this value is stored as the vertex and index value of the adjacency list
+     * to, this values is stored as the value stored inside the from list
+     */
     public void addEdge(int from, int to) {
         if (from >= 0 && from < size && to >= 0 && to < size) {
             adjacency.get(from).add(to);
@@ -42,25 +68,22 @@ public class ListGraph extends Graph {
      * 2. Removes incoming edges to this vertex
      */
     public void removeVertex(int vertex) {
-        if (vertex < 0 || vertex >= size || removed[vertex]) return;
+        if (vertex < 0 || vertex >= size || removed[vertex]) {
+            return;
+        }
 
+        //mark vertex as removed
         removed[vertex] = true;
 
-        // Remove incoming edges
+        // Remove incoming edges for the vertex
         for (int i = 0; i < size; i++) {
             adjacency.get(i).remove(Integer.valueOf(vertex));
         }
     }
 
-    /** Checks if all vertices have been removed */
-    public boolean isEmpty() {
-        for (boolean r : removed) {
-            if (!r) return false;
-        }
-        return true;
-    }
-
-    /** Print the graph state (for debugging / sink elimination steps) */
+    /**
+     * Print the graph state (for debugging / sink elimination steps)
+     */
     public void printGraph() {
         System.out.println("Graph state:");
         for (int i = 0; i < size; i++) {
@@ -70,10 +93,13 @@ public class ListGraph extends Graph {
                 System.out.println(i + " -> removed");
             }
         }
-        System.out.println("----------------------------------------------");
+        System.out.println("\n----------------------------------------------");
     }
 
     @Override
+    /**
+     * Prints the created adjacency list in a string to the user
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < size; i++) {
@@ -85,16 +111,25 @@ public class ListGraph extends Graph {
     }
 
     /**
-     * Task 5: Detect a cycle using DFS
+     * Detect a cycle using DFS
      * Returns an ArrayList containing a cycle if one exists, otherwise null
+     * There can be multiple cycles, but this code displays only one cycle
      */
     public List<Integer> findCycle() {
+        //creates an array to store the visited vertexes
         boolean[] visited = new boolean[size];
-        boolean[] recStack = new boolean[size]; // recursion stack for DFS
+
+        //creates an array to record the current vertex in a stack
+        boolean[] recStack = new boolean[size];
 
         for (int i = 0; i < size; i++) {
+            //if a vertex is not removed and not visited
             if (!removed[i] && !visited[i]) {
+
+                //creates a new array 'path' to store the cycle path
                 List<Integer> path = new ArrayList<>();
+
+                //calls dfsCycle() to find the cycle
                 if (dfsCycle(i, visited, recStack, path)) {
                     return path; // cycle found
                 }
@@ -103,17 +138,35 @@ public class ListGraph extends Graph {
         return null; // no cycle
     }
 
-    /** Helper for DFS cycle detection */
+    /**
+     * Method for DFS cycle detection
+     */
     private boolean dfsCycle(int v, boolean[] visited, boolean[] recStack, List<Integer> path) {
+
+        //stores the current vertex as visited, in the stack and records in the path array
         visited[v] = true;
         recStack[v] = true;
         path.add(v);
 
+        //iterate through every element inside the vertex in adjacency
+        //neighbour mean the vertex that the current vertex is pointing to
         for (int neighbor : adjacency.get(v)) {
-            if (removed[neighbor]) continue;
+
+            //if a neighbour is removed, move to the next iteration
+            if (removed[neighbor]){
+                continue;
+            }
+
+            //if a neighbour is not visited, visit the neighbour
+            //impersonates the behaviour of a stack
             if (!visited[neighbor]) {
-                if (dfsCycle(neighbor, visited, recStack, path)) return true;
-            } else if (recStack[neighbor]) {
+
+                //creates a recursive function to check all pointing vertexes
+                if (dfsCycle(neighbor, visited, recStack, path)) {
+                    return true;
+                }
+            }
+            else if (recStack[neighbor]) {
                 // cycle detected, trim path to cycle
                 int idx = path.indexOf(neighbor);
                 List<Integer> cycle = new ArrayList<>(path.subList(idx, path.size()));
