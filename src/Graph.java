@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public abstract class Graph {
 
-    //checks the number of vertexes in the graph
+    //checks the number of vertices in the graph
     int size;
 
     /**
@@ -39,15 +39,16 @@ public abstract class Graph {
 
     /**
      * This method displays the edge list in the file as an adjacency list to the user
-     * @return the string
      */
-    public abstract String toString();
+    public abstract void printGraph();
 
     /**
      * main method that initiates the program
      * @param args
      */
     public static void main(String[] args) {
+
+
         Scanner input = new Scanner(System.in);
 
         //takes user's input to select the file to read
@@ -65,12 +66,14 @@ public abstract class Graph {
 
         try {
             s = new Scanner(new File(file));
+            System.out.println("Selected file : "+file+"\n");
         } catch (Exception e) {
             //shows an error message if the file is not found
             System.out.println("Could not open input file: " + e.getMessage());
             System.exit(0);
         }
 
+        long start = System.currentTimeMillis();
         // Read number of vertices as displayed in the top of the file
         int numVertices = s.nextInt();
 
@@ -81,35 +84,42 @@ public abstract class Graph {
         g.addEdgesFromFile(s);
 
         // Print original graph
-
         System.out.println("-------- Original Graph Adjacency List --------");
-        System.out.println(g.toString());
+        g.printGraph();
 
         // Sink elimination step by step
-        System.out.println("------------- Sink Elimination ----------------");
+        System.out.println("\n------------- Sink Elimination ----------------");
         int sinkCount = 0;
         int sink;
         while ((sink = g.findSink()) != -1) {
             System.out.println("Removing sink vertex: " + sink);
             g.removeVertex(sink);
             sinkCount ++;
-            g.printGraph();
+            //g.printGraph();
         }
-        System.out.println("Total number of sinks committed : " + sinkCount+"\n");
+        System.out.println("\n------- Graph after Sink Elimination ----------");
+        g.printGraph();
+        System.out.println("\n----------------------------------------------");
+        System.out.println("Total number of sinks committed : " + sinkCount);
 
 
         // Detect whether the graph is Acyclic or not
-        System.out.println("----------- Is this Graph Acyclic? -----------");
+        System.out.println("\n----------- Is this Graph Acyclic? -----------");
         List<Integer> cycle = g.findCycle();
 
-        if (cycle == null) {
-            //Displays 'Yes' if the graph is Acyclic
-            System.out.println("Yes, this is an 'Acyclic' graph");
+        //assigns a boolean value to check if graph is acyclic or not
+        //true if acyclic, false if not
+        boolean acyclic = g.isAcyclic();
+        if (acyclic) {
+            System.out.println("Yes, this graph is 'Acyclic'");
             System.out.println("No cycle detected in the remaining graph.");
         } else {
-            //Displays 'No' if the graph is Cyclic
-            System.out.println("No, this is a 'Cyclic' graph");
+            System.out.println("No, this graph is 'Cyclic'");
             System.out.println("Cycle detected: " + cycle);
         }
+
+        long now = System.currentTimeMillis();
+        double elapsed = (now - start) / 1000.0;
+        System.out.println("Elapsed time = " + elapsed + " seconds");
     }
 }

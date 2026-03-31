@@ -37,12 +37,12 @@ public class ListGraph extends Graph {
         }
     }
 
-    @Override
     /**
      * The values read from the file are stored a from and to
      * from, this value is stored as the vertex and index value of the adjacency list
      * to, this values is stored as the value stored inside the from list
      */
+    @Override
     public void addEdge(int from, int to) {
         if (from >= 0 && from < size && to >= 0 && to < size) {
             adjacency.get(from).add(to);
@@ -84,8 +84,9 @@ public class ListGraph extends Graph {
     /**
      * Print the graph state (for debugging / sink elimination steps)
      */
+    @Override
     public void printGraph() {
-        System.out.println("Graph state:");
+
         for (int i = 0; i < size; i++) {
             if (!removed[i]) {
                 System.out.println(i + " -> " + adjacency.get(i));
@@ -93,21 +94,6 @@ public class ListGraph extends Graph {
                 System.out.println(i + " -> removed");
             }
         }
-        System.out.println("\n----------------------------------------------");
-    }
-
-    @Override
-    /**
-     * Prints the created adjacency list in a string to the user
-     */
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < size; i++) {
-            sb.append(i).append(": ");
-            sb.append(adjacency.get(i));
-            sb.append("\n");
-        }
-        return sb.toString();
     }
 
     /**
@@ -116,7 +102,7 @@ public class ListGraph extends Graph {
      * There can be multiple cycles, but this code displays only one cycle
      */
     public List<Integer> findCycle() {
-        //creates an array to store the visited vertexes
+        //creates an array to store the visited vertices
         boolean[] visited = new boolean[size];
 
         //creates an array to record the current vertex in a stack
@@ -161,7 +147,7 @@ public class ListGraph extends Graph {
             //impersonates the behaviour of a stack
             if (!visited[neighbor]) {
 
-                //creates a recursive function to check all pointing vertexes
+                //creates a recursive function to check all pointing vertices
                 if (dfsCycle(neighbor, visited, recStack, path)) {
                     return true;
                 }
@@ -180,6 +166,32 @@ public class ListGraph extends Graph {
         recStack[v] = false;
         path.remove(path.size() - 1);
         return false;
+    }
+
+    /**
+     * Checks if all vertices have been removed
+     */
+    public boolean isEmpty() {
+        for (boolean r : removed) {
+            if (!r) return false;
+        }
+        return true;
+    }
+
+    /**
+     * checks if the graph is acyclic based on the remaining number of vertices
+     * @return true if graph is acyclic, false if not
+     */
+    public boolean isAcyclic() {
+        while (true) {
+            if (isEmpty()) {
+                return true;  // Step 1
+            }
+            int sink = findSink();
+            if (sink == -1) {
+                return false; // Step 2
+            }
+        }
     }
 
 }
